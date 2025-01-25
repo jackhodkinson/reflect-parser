@@ -1,5 +1,5 @@
-import { MarkdownSerializer } from "../prosemirror-markdown/src/to_markdown";
-import { defaultMarkdownSerializer } from "../prosemirror-markdown/src/to_markdown";
+import { MarkdownSerializer } from "prosemirror-markdown";
+import { defaultMarkdownSerializer } from "prosemirror-markdown";
 
 export const customMarkdownSerializer = new MarkdownSerializer(
   {
@@ -74,10 +74,10 @@ export const customMarkdownSerializer = new MarkdownSerializer(
 
     // 5) Update tag serialization to match the original format
     tag: (state, node) => {
-      state.write(`@[${node.attrs.label}](${node.attrs.id})`)
+      state.write(`@[${node.attrs.label}](${node.attrs.id})`);
     },
     backlink: (state, node) => {
-      state.write(`[[${node.attrs.label}]]`)
+      state.write(`[[${node.attrs.label}]]`);
     },
   },
   defaultMarkdownSerializer.marks

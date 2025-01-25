@@ -3,12 +3,16 @@
   "module": "main.ts",
   "type": "module",
   "dependencies": {
-    "prosemirror-markdown": "link:prosemirror-markdown",
-    "prosemirror-model": "^1.19.4",
-    "markdown-it": "^14.0.0"
+    "markdown-it": "^14.0.0",
+    "prosemirror-markdown": "^1.13.1",
+    "prosemirror-model": "^1.24.1",
+    "prosemirror-state": "^1.4.3",
+    "prosemirror-transform": "^1.10.2"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/prosemirror-markdown": "^1.9.0",
+    "@types/prosemirror-model": "^1.17.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
