@@ -1,0 +1,16 @@
+{
+  "name": "parseprosemirror",
+  "module": "main.ts",
+  "type": "module",
+  "dependencies": {
+    "prosemirror-markdown": "link:prosemirror-markdown",
+    "prosemirror-model": "^1.19.4",
+    "markdown-it": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
