@@ -122,7 +122,7 @@ export const customMarkdownSerializer = new MarkdownSerializer(
 
     // 5) Update tag serialization to match the original format
     tag: (state, node) => {
-      state.write(`@[${node.attrs.label}](${node.attrs.id})`);
+      state.write(`#${node.attrs.label}`);
     },
     backlink: (state, node) => {
       state.write(`[[${node.attrs.label}]]`);
@@ -169,7 +169,9 @@ export const customMarkdownSerializer = new MarkdownSerializer(
     },
     // TODO: verify we can open a real link
     file: (state, node) => {
-      state.write(`[download file (${node.attrs.fileType}): ${node.attrs.fileName}](${node.attrs.url})`);
+      state.write(
+        `[download file (${node.attrs.fileType}): ${node.attrs.fileName}](${node.attrs.url})`
+      );
       state.closeBlock(node);
     },
   },

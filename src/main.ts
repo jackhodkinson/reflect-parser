@@ -37,8 +37,6 @@ if (!notesArray.success) {
   process.exit(1);
 }
 
-const parsedNotes: ParsedNote[] = [];
-
 // Function to properly escape and encode CSV fields
 function escapeCsvField(value: string | number | null): string {
   if (value === null) return '""';
@@ -86,7 +84,7 @@ for (let i = 0; i < notesArray.data.length; i++) {
 const BOM = "\ufeff";
 const csvHeader =
   "id,subject,created_at,updated_at,edited_at,daily_at,backlinked_count,document_json\n";
-const csvRows = parsedNotes
+const csvRows = notesArray.data
   .map((note) => {
     return [
       escapeCsvField(note.id),
@@ -108,5 +106,5 @@ await Bun.write(
 );
 
 console.log(
-  `Successfully parsed ${parsedNotes.length} notes and saved to parsed_notes.csv`
+  `Successfully parsed ${notesArray.data.length} notes and saved to parsed_notes.csv`
 );
