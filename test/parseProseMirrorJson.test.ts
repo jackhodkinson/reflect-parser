@@ -790,6 +790,116 @@ This looks hard but there are some resources:
     expect(parseProseMirrorJson(input)).toBe(expected);
   });
 
+  test("should handle ordered lists", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "orderedList",
+          attrs: {
+            order: 1
+          },
+          content: [
+            {
+              type: "listItem",
+              attrs: {
+                closed: false,
+                nested: false
+              },
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "First item"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              type: "listItem",
+              attrs: {
+                closed: false,
+                nested: false
+              },
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Second item"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const expected = "1. First item\n2. Second item";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle ordered lists with custom start number", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "orderedList",
+          attrs: {
+            order: 3
+          },
+          content: [
+            {
+              type: "listItem",
+              attrs: {
+                closed: false,
+                nested: false
+              },
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Third item"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              type: "listItem",
+              attrs: {
+                closed: false,
+                nested: false
+              },
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Fourth item"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const expected = "3. Third item\n4. Fourth item";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
   test("should handle code blocks", () => {
     const input = {
       type: "doc",

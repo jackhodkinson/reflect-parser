@@ -21,6 +21,49 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       state.renderContent(node);
     },
 
+    orderedList(state, node) {
+      // Use the `order` attribute if present; default to 1
+      const start = node.attrs.order || 1;
+
+      // In ProseMirror, "tight" means fewer blank lines between list items
+      const prevTight = state.inTightList;
+      const isTight = node.attrs.tight ?? state.options.tightLists;
+      state.inTightList = isTight;
+
+      // If the last node was something that needs a blank line before
+      // starting this new list, handle it:
+      if (state.closed) {
+        if (isTight) {
+          state.flushClose(1); // tight => single newline
+        } else {
+          state.flushClose(2); // default => two newlines
+        }
+      }
+
+      // Render each list item in turn, incrementing the bullet number
+      node.forEach((child, _, i) => {
+        // For tight lists, ensure only one newline between items
+        if (i > 0 && isTight) {
+          state.flushClose(1);
+        }
+        // e.g. if start=3, first item is "3. ", second is "4. ", etc.
+        const bullet = `${start + i}. `;
+
+        // We indent the content with `"  "` and prefix each line with bullet
+        state.wrapBlock("  ", bullet, child, () => {
+          state.render(child, node, i);
+        });
+      });
+
+      // Restore previous `inTightList` setting
+      state.inTightList = prevTight;
+    },
+
+    // And remember to customize "orderedList" items if needed:
+    listItem(state, node) {
+      state.renderContent(node);
+    },
+
     // 4) Our custom 'list' node
     list(state, node) {
       const isTight =
