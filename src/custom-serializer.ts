@@ -79,6 +79,22 @@ export const customMarkdownSerializer = new MarkdownSerializer(
     backlink: (state, node) => {
       state.write(`[[${node.attrs.label}]]`);
     },
+    tweet: (state, node) => {
+      const tweetData = node.attrs.tweetData;
+      // Get current indentation level from state, but remove one level
+      const baseIndent = ((state as any).delim || "").slice(0, -2);
+
+      state.write(
+        `#tweet from ${tweetData.user.name} (@${tweetData.user.screen_name})\n`
+      );
+      // Split text into lines and indent each one, maintaining parent indentation
+      const lines = tweetData.text.split("\n");
+      lines.forEach((line: string, index: number) => {
+        state.write(`${baseIndent}${line}`);
+        if (index < lines.length - 1) state.write("\n");
+      });
+      state.closeBlock(node);
+    },
   },
   defaultMarkdownSerializer.marks
 );

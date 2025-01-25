@@ -63,6 +63,21 @@ export const customSchema = new Schema({
       toDOM() {
         return ["li", 0];
       },
+    })
+    .addToEnd("tweet", {
+      attrs: {
+        tweetData: { default: {} },
+        url: { default: "" },
+      },
+      group: "block",
+      content: "",
+      toDOM: (node) => [
+        "div",
+        {
+          class: "tweet",
+        },
+        node.attrs.tweetData.text || "",
+      ],
     }),
   marks: baseSchema.spec.marks,
 });

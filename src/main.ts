@@ -20,8 +20,8 @@ for (let i = 0; i < 100; i++) {
   try {
     markdown = parseProseMirrorJson(prosemirrorJson);
   } catch (e) {
-    console.log(`skipping ${i}`);
-    continue;
+    console.log(`Failed to parse ${JSON.stringify(prosemirrorJson, null, 2)}`);
+    throw e;
   }
   if (markdown.trim().length > 1) {
     console.log(JSON.stringify(JSON.parse(note.document_json), null, 2));
