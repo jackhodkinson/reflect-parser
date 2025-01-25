@@ -16,6 +16,21 @@ export const customSchema = new Schema({
         return ["br"];
       },
     })
+    .addToEnd("iframe", {
+      group: "block",
+      attrs: {
+        src: { default: "" },
+        allowFullScreen: { default: true },
+        frameBorder: { default: 0 },
+        type: { default: "youtube" },
+        width: { default: 560 },
+        height: { default: 315 }
+      },
+      parseDOM: [{ tag: "iframe" }],
+      toDOM(node) {
+        return ["iframe", node.attrs];
+      },
+    })
     .addToEnd("horizontalRule", {
       group: "block",
       parseDOM: [{ tag: "hr" }],

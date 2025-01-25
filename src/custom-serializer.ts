@@ -103,6 +103,10 @@ export const customMarkdownSerializer = new MarkdownSerializer(
     hardBreak: (state) => {
       state.write("\n");
     },
+    iframe: (state, node) => {
+      state.write(`[View Video](${node.attrs.src})`);
+      state.closeBlock(node);
+    },
     horizontalRule: (state, node) => {
       state.write("---");
       state.closeBlock(node);
