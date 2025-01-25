@@ -998,4 +998,37 @@ This looks hard but there are some resources:
     const expected = "[download file (application/pdf): research-paper.pdf](https://reflect-assets.app/v1/file.pdf)";
     expect(parseProseMirrorJson(input)).toBe(expected);
   });
+
+  test("should handle strikethrough text", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "This is ",
+            },
+            {
+              type: "text",
+              text: "struck through",
+              marks: [
+                {
+                  type: "strike"
+                }
+              ]
+            },
+            {
+              type: "text",
+              text: " text"
+            }
+          ]
+        }
+      ]
+    };
+
+    const expected = "This is ~~struck through~~ text";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
 });

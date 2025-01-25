@@ -282,6 +282,16 @@ export const customSchema = new Schema({
       toDOM() {
         return ["u", 0];
       },
+    })
+    .addToEnd("strike", {
+      parseDOM: [
+        { tag: "s" },
+        { tag: "strike" },
+        { style: "text-decoration=line-through" }
+      ],
+      toDOM() {
+        return ["s", 0];
+      },
     }),
 });
 

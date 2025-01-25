@@ -167,6 +167,7 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       state.write("```");
       state.closeBlock(node);
     },
+    // TODO: verify we can open a real link
     file: (state, node) => {
       state.write(`[download file (${node.attrs.fileType}): ${node.attrs.fileName}](${node.attrs.url})`);
       state.closeBlock(node);
@@ -188,6 +189,12 @@ export const customMarkdownSerializer = new MarkdownSerializer(
     underline: {
       open: "__",
       close: "__",
+      mixable: true,
+      expelEnclosingWhitespace: true,
+    },
+    strike: {
+      open: "~~",
+      close: "~~",
       mixable: true,
       expelEnclosingWhitespace: true,
     },
