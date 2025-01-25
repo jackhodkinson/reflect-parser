@@ -978,4 +978,24 @@ This looks hard but there are some resources:
     const expected = "Text before\n\n---\n\nText after";
     expect(parseProseMirrorJson(input)).toBe(expected);
   });
+
+  test("should handle file attachments", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "file",
+          attrs: {
+            url: "https://reflect-assets.app/v1/file.pdf",
+            fileName: "research-paper.pdf",
+            fileType: "application/pdf",
+            fileSize: 617702
+          }
+        }
+      ]
+    };
+
+    const expected = "[download file (application/pdf): research-paper.pdf](https://reflect-assets.app/v1/file.pdf)";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
 });

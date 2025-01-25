@@ -178,6 +178,25 @@ export const customSchema = new Schema({
         },
         node.attrs.tweetData.text || "",
       ],
+    })
+    .addToEnd("file", {
+      attrs: {
+        url: { default: "" },
+        fileName: { default: "" },
+        fileType: { default: "" },
+        fileSize: { default: null }
+      },
+      group: "block",
+      content: "",
+      toDOM: (node) => [
+        "div",
+        {
+          class: "file-attachment",
+          "data-url": node.attrs.url,
+          "data-filename": node.attrs.fileName,
+          "data-filetype": node.attrs.fileType
+        }
+      ],
     }),
   marks: baseSchema.spec.marks
     .update("em", {

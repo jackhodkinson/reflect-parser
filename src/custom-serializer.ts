@@ -167,6 +167,10 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       state.write("```");
       state.closeBlock(node);
     },
+    file: (state, node) => {
+      state.write(`[download file (${node.attrs.fileType}): ${node.attrs.fileName}](${node.attrs.url})`);
+      state.closeBlock(node);
+    },
   },
   {
     em: defaultMarkdownSerializer.marks.em,
