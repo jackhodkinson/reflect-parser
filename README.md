@@ -1,4 +1,6 @@
-# parseprosemirror
+# reflect-parser
+
+This is a simple CLI designed to parse Reflect's JSON format into Markdown.
 
 To install dependencies:
 
