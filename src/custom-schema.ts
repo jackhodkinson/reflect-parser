@@ -7,6 +7,82 @@ console.log("Base schema nodes:", Object.keys(baseSchema.spec.nodes));
 // Extend the base schema by adding our tag node
 export const customSchema = new Schema({
   nodes: baseSchema.spec.nodes
+    .addToEnd("hardBreak", {
+      inline: true,
+      group: "inline",
+      selectable: false,
+      parseDOM: [{ tag: "br" }],
+      toDOM() {
+        return ["br"];
+      },
+    })
+    .addToEnd("horizontalRule", {
+      group: "block",
+      parseDOM: [{ tag: "hr" }],
+      toDOM() {
+        return ["hr"];
+      },
+    })
+    .addToEnd("codeBlock", {
+      content: "text*",
+      group: "block",
+      code: true,
+      defining: true,
+      attrs: { params: { default: "" } },
+      parseDOM: [
+        {
+          tag: "pre",
+          preserveWhitespace: "full",
+          getAttrs: (node) => ({
+            params: node.getAttribute("data-params") || "",
+          }),
+        },
+      ],
+      toDOM(node) {
+        return [
+          "pre",
+          node.attrs.params ? { "data-params": node.attrs.params } : {},
+          ["code", 0],
+        ];
+      },
+    })
+    .addToEnd("orderedList", {
+      content: "listItem+",
+      group: "block",
+      attrs: {
+        order: { default: 1 },
+        tight: { default: true },
+      },
+      parseDOM: [
+        {
+          tag: "ol",
+          getAttrs(dom) {
+            return {
+              order: dom.hasAttribute("start")
+                ? +dom.getAttribute("start")!
+                : 1,
+            };
+          },
+        },
+      ],
+      toDOM(node) {
+        return node.attrs.order === 1
+          ? ["ol", 0]
+          : ["ol", { start: node.attrs.order }, 0];
+      },
+    })
+    .addToEnd("listItem", {
+      content: "paragraph block*",
+      defining: true,
+      attrs: {
+        closed: { default: false },
+        nested: { default: false },
+      },
+      parseDOM: [{ tag: "li" }],
+      toDOM() {
+        return ["li", 0];
+      },
+    })
     .addToEnd("tag", {
       attrs: {
         id: { default: "" },
@@ -45,15 +121,24 @@ export const customSchema = new Schema({
       content: "list_item+",
       group: "block",
       attrs: {
-        kind: { default: "bullet" },
+        kind: { default: "bullet" }, // bullet, ordered, or task
         checked: { default: false },
         collapsed: { default: false },
         guid: { default: "" },
         tight: { default: true },
+        archived: { default: false },
       },
-      parseDOM: [{ tag: "ul" }],
-      toDOM() {
-        return ["ul", 0];
+      parseDOM: [
+        { tag: "ul", getAttrs: () => ({ kind: "bullet" }) },
+        { tag: "ol", getAttrs: () => ({ kind: "ordered" }) },
+        { tag: "ul[data-task]", getAttrs: () => ({ kind: "task" }) },
+      ],
+      toDOM(node) {
+        return node.attrs.kind === "task"
+          ? ["ul", { "data-task": "true" }, 0]
+          : node.attrs.kind === "ordered"
+          ? ["ol", 0]
+          : ["ul", 0];
       },
     })
     .addToEnd("list_item", {
@@ -80,50 +165,90 @@ export const customSchema = new Schema({
       ],
     }),
   marks: baseSchema.spec.marks
-    .update("italic", {
-      parseDOM: [{tag: "i"}, {tag: "em"}, {style: "font-style=italic"}],
-      toDOM() { return ["em", 0] }
+    .update("em", {
+      parseDOM: [{ tag: "i" }, { tag: "em" }, { style: "font-style=italic" }],
+      toDOM() {
+        return ["em", 0];
+      },
     })
-    .update("bold", {
-      parseDOM: [{tag: "strong"}, {tag: "b"}, {style: "font-weight=bold"}],
-      toDOM() { return ["strong", 0] }
+    .addToEnd("italic", {
+      // Alias for em
+      parseDOM: [{ tag: "i" }, { tag: "em" }, { style: "font-style=italic" }],
+      toDOM() {
+        return ["em", 0];
+      },
+    })
+    .update("strong", {
+      parseDOM: [
+        { tag: "strong" },
+        { tag: "b" },
+        { style: "font-weight=bold" },
+      ],
+      toDOM() {
+        return ["strong", 0];
+      },
+    })
+    .addToEnd("bold", {
+      // Alias for strong
+      parseDOM: [
+        { tag: "strong" },
+        { tag: "b" },
+        { style: "font-weight=bold" },
+      ],
+      toDOM() {
+        return ["strong", 0];
+      },
     })
     .update("code", {
-      parseDOM: [{tag: "code"}],
-      toDOM() { return ["code", 0] }
+      parseDOM: [{ tag: "code" }],
+      toDOM() {
+        return ["code", 0];
+      },
     })
     .update("link", {
       attrs: {
         href: {},
-        title: {default: null}
+        title: { default: null },
       },
-      parseDOM: [{
-        tag: "a[href]",
-        getAttrs(dom) {
-          return {
-            href: dom.getAttribute("href"),
-            title: dom.getAttribute("title")
-          }
-        }
-      }],
-      toDOM(node) { return ["a", node.attrs, 0] }
+      parseDOM: [
+        {
+          tag: "a[href]",
+          getAttrs(dom) {
+            return {
+              href: dom.getAttribute("href"),
+              title: dom.getAttribute("title"),
+            };
+          },
+        },
+      ],
+      toDOM(node) {
+        return ["a", node.attrs, 0];
+      },
     })
     .addToEnd("textHighlight", {
       attrs: {
-        color: { default: "yellow" }
+        color: { default: "yellow" },
       },
-      parseDOM: [{
-        tag: "mark",
-        getAttrs(dom) {
-          return {
-            color: dom.getAttribute("data-color") || "yellow"
-          }
-        }
-      }],
+      parseDOM: [
+        {
+          tag: "mark",
+          getAttrs(dom) {
+            return {
+              color: dom.getAttribute("data-color") || "yellow",
+            };
+          },
+        },
+      ],
       toDOM(node) {
-        return ["mark", { "data-color": node.attrs.color }, 0]
-      }
+        return ["mark", { "data-color": node.attrs.color }, 0];
+      },
     })
+    .addToEnd("underline", {
+      parseDOM: [{ tag: "u" }, { style: "text-decoration=underline" }],
+      toDOM() {
+        return ["u", 0];
+      },
+    }),
 });
 
 // For debugging

@@ -30,8 +30,13 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       const prevTight = state.inTightList;
       state.inTightList = isTight;
 
-      // Use "-" for bullets, or "1." for numbered
-      const bullet = node.attrs.kind === "bullet" ? "-" : "1.";
+      // Use "-" for bullets, "1." for numbered, or "[ ]"/"[x]" for tasks
+      let bullet = "- ";
+      if (node.attrs.kind === "ordered") {
+        bullet = "1. ";
+      } else if (node.attrs.kind === "task") {
+        bullet = node.attrs.checked ? "[x] " : "[ ] ";
+      }
 
       // Decide how many blank lines to insert before this list
       if (state.closed) {
@@ -63,7 +68,7 @@ export const customMarkdownSerializer = new MarkdownSerializer(
           });
         } else {
           // Normal item => prepend bullet or "1."
-          state.wrapBlock("  ", bullet + " ", child, () => {
+          state.wrapBlock("  ", bullet, child, () => {
             state.render(child, node, i);
           });
         }
@@ -95,17 +100,39 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       });
       state.closeBlock(node);
     },
+    hardBreak: (state) => {
+      state.write("\n");
+    },
+    horizontalRule: (state, node) => {
+      state.write("---");
+      state.closeBlock(node);
+    },
+    codeBlock: (state, node) => {
+      state.write("```" + (node.attrs.params || "") + "\n");
+      state.text(node.textContent);
+      state.ensureNewLine();
+      state.write("```");
+      state.closeBlock(node);
+    },
   },
   {
     em: defaultMarkdownSerializer.marks.em,
+    italic: defaultMarkdownSerializer.marks.em,
     strong: defaultMarkdownSerializer.marks.strong,
+    bold: defaultMarkdownSerializer.marks.strong,
     link: defaultMarkdownSerializer.marks.link,
     code: defaultMarkdownSerializer.marks.code,
     textHighlight: {
       open: "==",
       close: "==",
       mixable: true,
-      expelEnclosingWhitespace: true
-    }
+      expelEnclosingWhitespace: true,
+    },
+    underline: {
+      open: "__",
+      close: "__",
+      mixable: true,
+      expelEnclosingWhitespace: true,
+    },
   }
 );

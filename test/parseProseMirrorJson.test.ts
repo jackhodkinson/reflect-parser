@@ -631,4 +631,241 @@ This looks hard but there are some resources:
     const expected = "This is *==important and highlighted==* text";
     expect(parseProseMirrorJson(input)).toBe(expected);
   });
+
+  test("should handle italic mark type", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Question: can we do something ambitious and ",
+            },
+            {
+              type: "text",
+              text: "replace",
+              marks: [
+                {
+                  type: "italic",
+                  attrs: {},
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " SerpAPI?",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected =
+      "Question: can we do something ambitious and *replace* SerpAPI?";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle bold mark type", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Msk physio in 2 weeks",
+              marks: [
+                {
+                  type: "bold",
+                  attrs: {},
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "**Msk physio in 2 weeks**";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle hardBreak nodes", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "backlink",
+              attrs: {
+                id: "08072024",
+                label: "7/8/2024",
+                graphId: "jackhodkinson",
+              },
+            },
+            {
+              type: "text",
+              text: " —  🚀 Satyrn's launch today was a big win.",
+            },
+            {
+              type: "hardBreak",
+            },
+            {
+              type: "text",
+              text: "1. Squash bugs reported by users",
+            },
+            {
+              type: "hardBreak",
+            },
+            {
+              type: "text",
+              text: "2. Ship low hanging fruit to keep users excited and engaged",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected =
+      "[[7/8/2024]] —  🚀 Satyrn's launch today was a big win.\n1. Squash bugs reported by users\n2. Ship low hanging fruit to keep users excited and engaged";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle task lists", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "list",
+          attrs: {
+            kind: "task",
+            checked: true,
+            collapsed: false,
+            guid: "25f33356-7538-44a4-a4aa-4c175b0d3f12",
+            archived: true,
+          },
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "who is using this if RevOps is not using it?",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "list",
+          attrs: {
+            kind: "task",
+            checked: false,
+            collapsed: false,
+            guid: "0842e8aa-5783-4559-a916-ba4cc415f2b6",
+            archived: true,
+          },
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "We don't do number of keywords on a jobpost?",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected =
+      "[x] who is using this if RevOps is not using it?\n[ ] We don't do number of keywords on a jobpost?";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle code blocks", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "codeBlock",
+          attrs: {
+            params: "javascript",
+          },
+          content: [
+            {
+              type: "text",
+              text: "function hello() {\n  console.log('Hello, world!');\n}",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected =
+      "```javascript\nfunction hello() {\n  console.log('Hello, world!');\n}\n```";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle code blocks without language", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "codeBlock",
+          attrs: {
+            params: "",
+          },
+          content: [
+            {
+              type: "text",
+              text: "Some code here\nAnother line",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "```\nSome code here\nAnother line\n```";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle horizontal rules", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Text before",
+            },
+          ],
+        },
+        {
+          type: "horizontalRule",
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Text after",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "Text before\n\n---\n\nText after";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
 });

@@ -1,4 +1,5 @@
 import { parseProseMirrorJson } from "./parseProseMirrorJson";
+import { z } from "zod";
 
 // Get the input file path from command line arguments
 const inputPath = process.argv[2];
@@ -8,26 +9,104 @@ if (!inputPath) {
   process.exit(1);
 }
 
+const noteSchema = z.object({
+  document_json: z.string(),
+  id: z.string(),
+  subject: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  edited_at: z.string().nullable(),
+  daily_at: z.string().nullable(),
+  backlinked_count: z.number(),
+});
+
+type Note = z.infer<typeof noteSchema>;
+
+type ParsedNote = Note & {
+  markdown: string;
+};
+
 const file = await Bun.file(inputPath).text();
 const jsonData = JSON.parse(file);
 
-// loop over 100 examples, print them, and save to file
-// TODO: handle errors and save in a better format
-for (let i = 0; i < 100; i++) {
-  const note = jsonData.notes[i];
-  const prosemirrorJson = JSON.parse(note.document_json);
+// Validate that jsonData.notes is an array
+const notesArray = z.array(noteSchema).safeParse(jsonData.notes);
+
+if (!notesArray.success) {
+  console.error("Invalid notes data:", notesArray.error);
+  process.exit(1);
+}
+
+const parsedNotes: ParsedNote[] = [];
+
+// Function to properly escape and encode CSV fields
+function escapeCsvField(value: string | number | null): string {
+  if (value === null) return '""';
+  if (typeof value === "number") return value.toString();
+
+  // Replace any double quotes with two double quotes
+  const escaped = value.replace(/"/g, '""');
+  // Replace any non-printable characters with their Unicode escape sequence
+  const sanitized = escaped.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
+  return `"${sanitized}"`;
+}
+
+// loop over notes and parse them
+for (let i = 0; i < notesArray.data.length; i++) {
+  const note = notesArray.data[i];
+  if (!note) break;
+
+  let prosemirrorJson;
+  try {
+    prosemirrorJson = JSON.parse(note.document_json);
+  } catch (e) {
+    console.error(
+      `Failed to parse document_json for note ${note.document_json}`
+    );
+    throw e;
+  }
+
   let markdown = "";
   try {
     markdown = parseProseMirrorJson(prosemirrorJson);
   } catch (e) {
-    console.log(`Failed to parse ${JSON.stringify(prosemirrorJson, null, 2)}`);
+    console.error(
+      `Failed to parse document_json for note ${note.document_json}`
+    );
+
     throw e;
   }
+
   if (markdown.trim().length > 1) {
-    console.log(JSON.stringify(JSON.parse(note.document_json), null, 2));
-    console.log("---");
-    console.log(markdown);
-    console.log("===");
-    await Bun.write(`./notes/${i}.md`, markdown);
+    await Bun.write(`./notes/${note.id}.md`, markdown);
   }
 }
+
+// Write to CSV with BOM for Excel compatibility
+const BOM = "\ufeff";
+const csvHeader =
+  "id,subject,created_at,updated_at,edited_at,daily_at,backlinked_count,document_json\n";
+const csvRows = parsedNotes
+  .map((note) => {
+    return [
+      escapeCsvField(note.id),
+      escapeCsvField(note.subject),
+      escapeCsvField(note.created_at),
+      escapeCsvField(note.updated_at),
+      escapeCsvField(note.edited_at),
+      escapeCsvField(note.daily_at),
+      escapeCsvField(note.backlinked_count),
+      escapeCsvField(note.document_json),
+    ].join(",");
+  })
+  .join("\n");
+
+const csvContent = BOM + csvHeader + csvRows;
+await Bun.write(
+  "./notes/parsed_notes.csv",
+  new TextEncoder().encode(csvContent)
+);
+
+console.log(
+  `Successfully parsed ${parsedNotes.length} notes and saved to parsed_notes.csv`
+);
