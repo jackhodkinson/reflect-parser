@@ -96,5 +96,16 @@ export const customMarkdownSerializer = new MarkdownSerializer(
       state.closeBlock(node);
     },
   },
-  defaultMarkdownSerializer.marks
+  {
+    em: defaultMarkdownSerializer.marks.em,
+    strong: defaultMarkdownSerializer.marks.strong,
+    link: defaultMarkdownSerializer.marks.link,
+    code: defaultMarkdownSerializer.marks.code,
+    textHighlight: {
+      open: "==",
+      close: "==",
+      mixable: true,
+      expelEnclosingWhitespace: true
+    }
+  }
 );

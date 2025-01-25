@@ -484,4 +484,151 @@ This looks hard but there are some resources:
 - Successfully handled multiple message types. Next up is to have two cells, and update the correct cell!`;
     expect(parseProseMirrorJson(input)).toBe(expected);
   });
+
+  test("should handle text highlights", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "This is ",
+            },
+            {
+              type: "text",
+              text: "highlighted",
+              marks: [
+                {
+                  type: "textHighlight",
+                  attrs: {
+                    color: "yellow",
+                  },
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "This is ==highlighted== text";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle text highlights with other marks", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "This is ",
+            },
+            {
+              type: "text",
+              text: "bold and highlighted",
+              marks: [
+                {
+                  type: "strong",
+                },
+                {
+                  type: "textHighlight",
+                  attrs: {
+                    color: "yellow",
+                  },
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "This is **==bold and highlighted==** text";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle italics", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "This is ",
+            },
+            {
+              type: "text",
+              text: "italicized",
+              marks: [
+                {
+                  type: "em",
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "This is *italicized* text";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
+
+  test("should handle italics with highlights", () => {
+    const input = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "This is ",
+            },
+            {
+              type: "text",
+              text: "important and highlighted",
+              marks: [
+                {
+                  type: "em",
+                },
+                {
+                  type: "textHighlight",
+                  attrs: {
+                    color: "yellow",
+                  },
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const expected = "This is *==important and highlighted==* text";
+    expect(parseProseMirrorJson(input)).toBe(expected);
+  });
 });
